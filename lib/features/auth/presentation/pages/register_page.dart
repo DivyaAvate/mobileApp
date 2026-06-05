@@ -50,7 +50,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         passwordController.text,
                         nameController.text,
                       );
-                      if (success && mounted) {
+                      if (success && context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text("Registration Successful! Please Login.")),
                         );

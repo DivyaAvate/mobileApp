@@ -6,18 +6,18 @@ const sequelize = new Sequelize(
   process.env.DB_USER,
   '',                    // empty string for no-password MySQL
   {
-    host:    process.env.DB_HOST || 'localhost',
-    port:    process.env.DB_PORT || 3307,
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 3307,
     dialect: 'mysql',
     logging: false,
 
     // ── Connection Pool ──────────────────────────────────────
     // Handles multiple simultaneous Flutter users
     pool: {
-      max:     10,  // max connections
-      min:     2,   // keep 2 alive always
+      max: 10,  // max connections
+      min: 2,   // keep 2 alive always
       acquire: 30000, // ms to wait before throwing error
-      idle:    10000, // ms before releasing idle connection
+      idle: 10000, // ms before releasing idle connection
     },
 
     // ── MySQL specific ───────────────────────────────────────
@@ -27,9 +27,9 @@ const sequelize = new Sequelize(
     },
 
     define: {
-      underscored:   true,       // auto snake_case column names
+      underscored: true,       // auto snake_case column names
       freezeTableName: false,    // pluralise table names
-      timestamps:    true,       // createdAt, updatedAt auto-added
+      timestamps: true,       // createdAt, updatedAt auto-added
     },
   }
 );
