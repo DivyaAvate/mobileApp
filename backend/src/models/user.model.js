@@ -44,6 +44,15 @@ const User = sequelize.define('User', {
     type:      DataTypes.DATE,
     allowNull: true,
   },
+  role: {
+  type: DataTypes.ENUM('member', 'gym_owner', 'super_admin'),
+  defaultValue: 'member',
+},
+isOnboarded: {
+  type: DataTypes.BOOLEAN,
+  defaultValue: false,
+  field: 'is_onboarded',
+},
 }, {
   hooks: {
     // Hash on register

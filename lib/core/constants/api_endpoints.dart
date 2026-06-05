@@ -9,12 +9,17 @@ class ApiEndpoints {
   // ─── Auth → /api/auth ──────────────────────────────────────
   static const login        = '/api/auth/login';
   static const register     = '/api/auth/register';
+  static const googleAuth   = '/api/auth/google';
   static const refreshToken = '/api/auth/refresh-token';
   static const logout       = '/api/auth/logout';
+  static const profile      = '/api/profile';
 
   // ─── Exercises → /api/exercises ────────────────────────────
   static const exercises      = '/api/exercises';
   static const exerciseDetail = '/api/exercises/:id';
+
+  static const workoutGenerate = '/api/workout/generate';
+  static const workoutCurrent  = '/api/workout/current';
 
   // ─── Gym → /api/gyms ───────────────────────────────────────
   static const gyms           = '/api/gyms';
@@ -25,6 +30,10 @@ class ApiEndpoints {
   static String memberData(String gymId, String memberId) => '/api/gyms/$gymId/members/$memberId';
   static String gymOffers(String gymId)          => '/api/gyms/$gymId/offers';
   static String deleteOffer(String gymId, String offerId) => '/api/gyms/$gymId/offers/$offerId';
+
+  // ─── Progress → /api/progress ─────────────────────────────
+  static const progress    = '/api/progress';
+  static const progressLog = '/api/progress/log';
 
   // ─── Steps → /api/steps ────────────────────────────────────
   static const stepsSync   = '/api/steps/sync';

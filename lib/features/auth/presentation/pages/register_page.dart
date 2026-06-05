@@ -17,24 +17,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authControllerProvider);
+    final authState = ref.watch(authProvider);
 
-    // Listen for success or error
-    ref.listen<AsyncValue>(authControllerProvider, (previous, next) {
-      next.maybeWhen(
-        data: (user) {
-          if (user != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Registration Successful! Please Login.")),
-            );
-            Navigator.pop(context); // Go back to Login page
-          }
-        },
-        error: (e, _) => ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        ),
-        orElse: () {},
-      );
+    // Listen for error
+    ref.listen<AuthState>(authProvider, (previous, next) {
+      if (next.error != null && next.error != previous?.error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.error!)),
+        );
+      }
     });
 
     return Scaffold(
@@ -50,19 +41,24 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             const SizedBox(height: 15),
             AuthField(hintText: 'Password', controller: passwordController, isPassword: true),
             const SizedBox(height: 25),
-            authState.maybeWhen(
-              loading: () => const CircularProgressIndicator(),
-              orElse: () => ElevatedButton(
-                onPressed: () {
-                  ref.read(authControllerProvider.notifier).register(
-                    emailController.text,
-                    passwordController.text,
-                    nameController.text,
-                  );
-                },
-                child: const Text("Register"),
-              ),
-            ),
+            authState.isLoading
+                ? const CircularProgressIndicator()
+                : ElevatedButton(
+                    onPressed: () async {
+                      final success = await ref.read(authProvider.notifier).register(
+                        emailController.text,
+                        passwordController.text,
+                        nameController.text,
+                      );
+                      if (success && mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Registration Successful! Please Login.")),
+                        );
+                        Navigator.pop(context); // Go back to Login page
+                      }
+                    },
+                    child: const Text("Register"),
+                  ),
           ],
         ),
       ),

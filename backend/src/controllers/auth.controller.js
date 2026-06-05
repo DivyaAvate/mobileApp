@@ -76,3 +76,12 @@ exports.refreshToken = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getProfile = async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.user.id, {
+      attributes: ['id', 'email', 'displayName', 'level', 'xp', 'role', 'isOnboarded']
+    });
+    res.json(user);
+  } catch (e) { next(e); }
+};

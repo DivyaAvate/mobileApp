@@ -30,7 +30,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             const SizedBox(height: 25),
             ElevatedButton(
               onPressed: () {
-                ref.read(authControllerProvider.notifier).login(
+                ref.read(authProvider.notifier).login(
                   emailController.text,
                   passwordController.text,
                 );

@@ -1,31 +1,70 @@
 import 'package:dio/dio.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../models/user_model.dart';
+import '../../../../core/constants/api_endpoints.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final Dio dio;
+  final Dio _dio;
+  final _googleSignIn = GoogleSignIn();
 
-  AuthRepositoryImpl(this.dio);
+  AuthRepositoryImpl(this._dio);
 
+  // ── Login ─────────────────────────────────────────────────
   @override
-  Future<UserModel> login(String email, String password) async {
-    final response = await dio.post('/auth/login', data: {
-      'email': email,
-      'password': password,
-    });
-    return UserModel.fromJson(response.data);
+  Future<LoginResult> login(String email, String password) async {
+    final response = await _dio.post(
+      ApiEndpoints.login,
+      data: { 'email': email, 'password': password },
+    );
+    return LoginResult.fromJson(response.data as Map<String, dynamic>);
   }
 
+  // ── Register ──────────────────────────────────────────────
   @override
-  Future<UserModel> register(String email, String password, String name) async {
-    final response = await dio.post('/auth/register', data: {
-      'email': email,
-      'password': password,
-      'displayName': name,
-    });
-    return UserModel.fromJson(response.data);
+  Future<void> register(String email, String password, String name) async {
+    await _dio.post(
+      ApiEndpoints.register,
+      data: {
+        'email':       email,
+        'password':    password,
+        'displayName': name,
+      },
+    );
+    // Registration just creates the account — login separately after
   }
 
+  // ── Get profile (for auto-login on app start) ─────────────
   @override
-  Future<void> googleSignIn() async {}
+  Future<UserModel> getProfile() async {
+    final response = await _dio.get(ApiEndpoints.profile);
+    return UserModel.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  // ── Google Sign-In ────────────────────────────────────────
+  @override
+  Future<LoginResult> googleSignIn() async {
+    final account = await _googleSignIn.signIn();
+    if (account == null) throw Exception('Google sign-in cancelled');
+
+    final auth    = await account.authentication;
+    final idToken = auth.idToken;
+    if (idToken == null) throw Exception('Failed to get Google ID token');
+
+    final response = await _dio.post(
+      ApiEndpoints.googleAuth,
+      data: { 'idToken': idToken },
+    );
+    return LoginResult.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  // ── Logout ────────────────────────────────────────────────
+  @override
+  Future<void> logout() async {
+    try {
+      await _dio.post(ApiEndpoints.logout);
+    } catch (_) {
+      // Ignore backend errors — local token already cleared
+    }
+  }
 }

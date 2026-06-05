@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../providers/gamification_provider.dart';
 import '../../data/models/achievement_model.dart';
 
@@ -8,51 +9,73 @@ class AchievementsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final levelData = ref.watch(gamificationProvider);
-    final badges = ref.watch(badgesProvider);
+    final levelAsync  = ref.watch(gamificationProvider);
+    final badgesAsync = ref.watch(badgesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Rewards & Levels")),
+      backgroundColor: AppColors.bgPrimary,
+      appBar: AppBar(
+        backgroundColor: AppColors.bgPrimary,
+        title: const Text('Rewards & Levels',
+          style: TextStyle(
+            color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(0.5),
+          child: Container(height: 0.5, color: AppColors.border)),
+      ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Level Progress Card
-            levelData.when(
+
+            // ── Level Card ──────────────────────────────────
+            levelAsync.when(
+              loading: () => const LinearProgressIndicator(
+                color: AppColors.accentGreen),
+              error: (err, stack) => const SizedBox.shrink(),
               data: (data) => _LevelCard(
-                level: data.level,
-                currentXp: data.currentXP,
+                level:      data.level,
+                currentXp:  data.currentXP,
                 nextLevelXp: data.nextLevelXP,
               ),
-              loading: () => const LinearProgressIndicator(),
-              error: (err, stack) => const Text("Error loading level"),
             ),
+            const SizedBox(height: 20),
 
-            // 2. Badges Grid
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Badges",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            badges.when(
-              data: (list) => GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                ),
-                itemCount: list.length,
-                itemBuilder: (context, i) => _BadgeItem(badge: list[i]),
-              ),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) => const Text("Error loading badges"), // ✅ __ for second param
+            // ── Badges ──────────────────────────────────────
+            const Text('BADGES',
+              style: TextStyle(
+                color: AppColors.textMuted,
+                fontSize: 11,
+                letterSpacing: 0.8,
+                fontWeight: FontWeight.w500,
+              )),
+            const SizedBox(height: 12),
+
+            badgesAsync.when(
+              loading: () => const Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.accentGreen)),
+              error: (err, stack) => const Center(
+                child: Text('Failed to load badges',
+                  style: TextStyle(color: AppColors.textMuted))),
+              data: (list) => list.isEmpty
+                  ? const Center(
+                      child: Text('No badges yet — keep training!',
+                        style: TextStyle(color: AppColors.textMuted)))
+                  : GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount:  3,
+                          mainAxisSpacing:  10,
+                          crossAxisSpacing: 10,
+                          childAspectRatio: 0.85,
+                        ),
+                      itemCount: list.length,
+                      itemBuilder: (_, i) => _BadgeItem(badge: list[i]),
+                    ),
             ),
           ],
         ),
@@ -60,6 +83,8 @@ class AchievementsPage extends ConsumerWidget {
     );
   }
 }
+
+// ─── Level Card ───────────────────────────────────────────────────────────────
 
 class _LevelCard extends StatelessWidget {
   final int level, currentXp, nextLevelXp;
@@ -71,34 +96,69 @@ class _LevelCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double progress = currentXp / nextLevelXp;
+    final progress = nextLevelXp > 0
+        ? (currentXp / nextLevelXp).clamp(0.0, 1.0)
+        : 0.0;
+
     return Container(
-      margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Colors.purple, Colors.deepPurple]),
-        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(colors: [
+          AppColors.accentBlue.withValues(alpha: 0.2),
+          AppColors.accentGreen.withValues(alpha: 0.15),
+        ]),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.accentGreen.withValues(alpha: 0.3), width: 0.5),
       ),
       child: Column(
         children: [
-          Text(
-            "LEVEL $level",
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.w900, // ✅ was FontWeight.black (doesn't exist)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const Text('CURRENT LEVEL',
+                  style: TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 11, letterSpacing: 0.8)),
+                Text('$level',
+                  style: const TextStyle(
+                    color: AppColors.accentGreen,
+                    fontSize: 48, fontWeight: FontWeight.w700, height: 1)),
+              ]),
+              Container(
+                width: 64, height: 64,
+                decoration: BoxDecoration(
+                  color: AppColors.accentGreen.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.emoji_events,
+                  color: AppColors.accentGreen, size: 32),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 8,
+              backgroundColor: AppColors.accentGreen.withValues(alpha: 0.12),
+              color: AppColors.accentGreen,
             ),
           ),
-          const SizedBox(height: 10),
-          LinearProgressIndicator(
-            value: progress,
-            backgroundColor: Colors.white24,
-            color: Colors.amber,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            "$currentXp / $nextLevelXp XP to Level ${level + 1}",
-            style: const TextStyle(color: Colors.white70),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('$currentXp XP',
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 12, fontWeight: FontWeight.w500)),
+              Text('$nextLevelXp XP to Level ${level + 1}',
+                style: const TextStyle(
+                  color: AppColors.textMuted, fontSize: 12)),
+            ],
           ),
         ],
       ),
@@ -106,29 +166,53 @@ class _LevelCard extends StatelessWidget {
   }
 }
 
+// ─── Badge Item ───────────────────────────────────────────────────────────────
+
 class _BadgeItem extends StatelessWidget {
   final AchievementModel badge;
   const _BadgeItem({required this.badge});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Opacity(
-          opacity: badge.isUnlocked ? 1.0 : 0.3,
-          child: CircleAvatar(
-            radius: 30,
-            backgroundColor: Colors.grey[200],
-            backgroundImage: NetworkImage(badge.iconUrl),
-          ),
+    return Opacity(
+      opacity: badge.isUnlocked ? 1.0 : 0.35,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: AppColors.bgCard,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: badge.isUnlocked
+                ? AppColors.accentGreen.withValues(alpha: 0.3)
+                : AppColors.border,
+            width: 0.5),
         ),
-        const SizedBox(height: 5),
-        Text(
-          badge.name,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            badge.iconUrl.isNotEmpty
+                ? Image.network(badge.iconUrl,
+                    width: 36, height: 36,
+                    errorBuilder: (ctx, err, stack) =>
+                      const Icon(Icons.emoji_events,
+                        color: AppColors.accentGreen, size: 36))
+                : const Icon(Icons.emoji_events,
+                    color: AppColors.accentGreen, size: 36),
+            const SizedBox(height: 6),
+            Text(badge.name,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: badge.isUnlocked
+                    ? AppColors.textPrimary : AppColors.textMuted,
+                fontSize: 10, fontWeight: FontWeight.w500)),
+            if (badge.isUnlocked)
+              const Icon(Icons.check_circle,
+                color: AppColors.accentGreen, size: 12),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
