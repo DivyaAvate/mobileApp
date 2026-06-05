@@ -4,7 +4,7 @@ require('dotenv').config();
 const sequelize = new Sequelize(
   process.env.DB_NAME,
   process.env.DB_USER,
-  '',                    // empty string for no-password MySQL
+  process.env.DB_PASS || '', // read password from env config
   {
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 3307,

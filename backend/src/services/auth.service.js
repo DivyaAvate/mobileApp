@@ -56,6 +56,10 @@ class AuthService {
         id:          user.id,
         email:       user.email,
         displayName: user.displayName,
+        level:       user.level,
+        xp:          user.xp,
+        role:        user.role,
+        isOnboarded: user.isOnboarded,
       },
       ...tokens,
     };
@@ -87,6 +91,10 @@ class AuthService {
         id:          user.id,
         email:       user.email,
         displayName: user.displayName,
+        level:       user.level,
+        xp:          user.xp,
+        role:        user.role,
+        isOnboarded: user.isOnboarded,
       },
       ...tokens,
     };

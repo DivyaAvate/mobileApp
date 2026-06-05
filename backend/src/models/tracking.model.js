@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db.config');
 
 const WorkoutLog = sequelize.define('WorkoutLog', {
-    userId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+    userId: { type: DataTypes.INTEGER, allowNull: false },
     planId: { type: DataTypes.INTEGER, allowNull: true },
     startTime: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     endTime: { type: DataTypes.DATE },

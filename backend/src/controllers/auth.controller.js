@@ -1,4 +1,5 @@
 const authService = require('../services/auth.service');
+const User        = require('../models/user.model');
 
 // POST /api/auth/register
 exports.register = async (req, res, next) => {
@@ -61,18 +62,30 @@ exports.googleAuth = async (req, res, next) => {
 // POST /api/auth/refresh-token
 exports.refreshToken = async (req, res, next) => {
   try {
-    const { token } = req.body;
+    const token = req.body.refresh_token || req.body.token;
     if (!token) {
       return res.status(401).json({ message: 'Refresh token required' });
     }
 
     // Delegate all JWT logic to authService — never in controller
     const result = await authService.refreshToken(token);
-    res.status(200).json({ accessToken: result.accessToken });
+    res.status(200).json({ 
+      accessToken: result.accessToken,
+      access_token: result.accessToken 
+    });
   } catch (error) {
     if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
       return res.status(403).json({ message: 'Invalid or expired refresh token' });
     }
+    next(error);
+  }
+};
+
+exports.logout = async (req, res, next) => {
+  try {
+    // Statelessly terminate on client, return success on server
+    res.status(200).json({ message: 'Logged out successfully' });
+  } catch (error) {
     next(error);
   }
 };

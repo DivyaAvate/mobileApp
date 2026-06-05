@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db.config');
 
 const WorkoutPlan = sequelize.define('WorkoutPlan', {
-    userId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+    userId: { type: DataTypes.INTEGER, allowNull: false },
     goal: { type: DataTypes.ENUM('fat_loss', 'muscle_gain', 'strength', 'general_fitness'), allowNull: false },
     experience: { type: DataTypes.ENUM('beginner', 'intermediate', 'advanced'), allowNull: false },
     daysPerWeek: { type: DataTypes.INTEGER, allowNull: false },
