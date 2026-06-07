@@ -56,6 +56,8 @@ class AuthService {
         id:          user.id,
         email:       user.email,
         displayName: user.displayName,
+        role:        user.role,           // ← ADD THIS
+         isOnboarded: user.isOnboarded,    // ← ADD THIS
         level:       user.level,
         xp:          user.xp,
         role:        user.role,

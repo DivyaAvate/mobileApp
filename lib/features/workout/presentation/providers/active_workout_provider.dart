@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/dio_provider.dart';
-
+import '../../../../core/services/notification_service.dart';
 // ─── Models ───────────────────────────────────────────────────────────────────
 
 class SetLogEntry {
@@ -155,6 +155,7 @@ class ActiveWorkoutNotifier extends StateNotifier<ActiveWorkoutState?> {
 
     try {
       final dio = _ref.read(dioProvider);
+      final notif = _ref.read(notificationServiceProvider);
       final payload = {
         'session_id':  state!.sessionId,
         'name':        state!.name,
@@ -173,7 +174,12 @@ class ActiveWorkoutNotifier extends StateNotifier<ActiveWorkoutState?> {
       };
 
       await dio.post('/api/tracking/finish/${state!.sessionId}', data: payload);
-      state = null; // clear session on success
+
+      // Show workout complete notification
+      final xpEarned = 150; // default — replace with response value
+      await notif.showWorkoutCompleteNotification(xpEarned: xpEarned);
+
+      state = null;
       return true;
 
     } catch (e) {

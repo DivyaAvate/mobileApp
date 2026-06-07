@@ -1,6 +1,8 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
+import '../../features/splash/splash_screen.dart';
+import '../../features/gym/presentation/pages/create_gym_screen.dart';
 import '../../features/gym/presentation/pages/gym_list_screen.dart';
 import '../../features/gym/presentation/pages/gym_owner_dashboard.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
@@ -19,10 +21,9 @@ import '../../features/profile/presentation/pages/achievements_page.dart';
 import '../../features/profile/presentation/pages/leaderboard_page.dart';
 import '../../features/progress/presentation/pages/progress_dashboard_page.dart';
 import '../../features/recovery/presentation/pages/recovery_dashboard_page.dart';
-import '../../features/workout/data/models/exercise_model.dart';
 
 final appRouter = GoRouter(
-  initialLocation: '/login',
+  initialLocation: '/splash',
   debugLogDiagnostics: true,
 
   errorBuilder: (context, state) => Scaffold(
@@ -36,6 +37,14 @@ final appRouter = GoRouter(
   ),
 
   routes: [
+    GoRoute(
+      path: '/splash',
+      builder: (_, _) => const SplashScreen(),
+    ),
+    GoRoute(
+      path: '/create-gym',
+      builder: (_, _) => const CreateGymScreen(),
+    ),
     GoRoute(
       path: '/select-gym',
       builder: (_, _) => const GymListScreen(),
@@ -89,8 +98,8 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/exercise-detail',
       builder: (context, state) {
-        final exercise = state.extra as ExerciseModel;
-        return ExerciseDetailPage(exercise: exercise);
+        final exerciseId = state.uri.queryParameters['id'] ?? '';
+        return ExerciseDetailPage(exerciseId: exerciseId);
       },
     ),
   ],

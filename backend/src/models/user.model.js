@@ -28,6 +28,33 @@ const User = sequelize.define('User', {
     type:         DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  role: {
+    type:         DataTypes.ENUM('member', 'gym_owner', 'super_admin'),
+    defaultValue: 'member',
+  },
+  isOnboarded: {
+    type:         DataTypes.BOOLEAN,
+    defaultValue: false,
+    field:        'is_onboarded',
+  },
+  age: {
+    type:      DataTypes.INTEGER,
+    allowNull: true,
+  },
+  heightCm: {
+    type:      DataTypes.FLOAT,
+    allowNull: true,
+    field:     'height_cm',
+  },
+  weightKg: {
+    type:      DataTypes.FLOAT,
+    allowNull: true,
+    field:     'weight_kg',
+  },
+  gender: {
+    type:      DataTypes.STRING,
+    allowNull: true,
+  },
   xp: {
     type:         DataTypes.INTEGER,
     defaultValue: 0,
@@ -44,15 +71,6 @@ const User = sequelize.define('User', {
     type:      DataTypes.DATE,
     allowNull: true,
   },
-  role: {
-  type: DataTypes.ENUM('member', 'gym_owner', 'super_admin'),
-  defaultValue: 'member',
-},
-isOnboarded: {
-  type: DataTypes.BOOLEAN,
-  defaultValue: false,
-  field: 'is_onboarded',
-},
 }, {
   hooks: {
     // Hash on register

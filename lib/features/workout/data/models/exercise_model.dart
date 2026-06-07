@@ -1,12 +1,12 @@
 class ExerciseModel {
-  final int id;
+  final int    id;
   final String name;
   final String description;
   final String muscleGroup;
   final String equipment;
   final String? videoUrl;
 
-  ExerciseModel({
+  const ExerciseModel({
     required this.id,
     required this.name,
     required this.description,
@@ -15,14 +15,12 @@ class ExerciseModel {
     this.videoUrl,
   });
 
-  factory ExerciseModel.fromJson(Map<String, dynamic> json) {
-    return ExerciseModel(
-      id: json['id'],
-      name: json['name'],
-      description: json['description'],
-      muscleGroup: json['muscleGroup'],
-      equipment: json['equipment'],
-      videoUrl: json['videoUrl'],
-    );
-  }
+  factory ExerciseModel.fromJson(Map<String, dynamic> j) => ExerciseModel(
+    id:          j['id']          as int?    ?? 0,
+    name:        j['name']        as String? ?? '',
+    description: j['description'] as String? ?? '',
+    muscleGroup: j['muscleGroup'] as String? ?? '',
+    equipment:   j['equipment']   as String? ?? '',
+    videoUrl:    j['videoUrl']    as String?,
+  );
 }

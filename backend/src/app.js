@@ -2,7 +2,6 @@ const express    = require('express');
 const cors       = require('cors');
 const helmet     = require('helmet');
 
-const sequelize      = require('./config/db.config');
 const errorHandler    = require('./middlewares/error.middleware');
 const authRoutes      = require('./routes/auth.routes');
 const exerciseRoutes  = require('./routes/exercise.routes');
@@ -47,18 +46,10 @@ app.use((req, res) => {
 // ─── Error Handler (must be last) ─────────────────────────────────────────────
 app.use(errorHandler);
 
-// ─── DB Sync + Start Server ───────────────────────────────────────────────────
+// ─── Start Server ─────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
-
-sequelize.sync({ alter: true }) // alter:true updates columns without dropping data
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-    });
-  })
-  .catch(err => {
-    console.error('❌ Failed to sync database:', err.message);
-    process.exit(1);
-  });
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
 
 module.exports = app;

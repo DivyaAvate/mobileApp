@@ -12,7 +12,7 @@ class ApiEndpoints {
   static const googleAuth   = '/api/auth/google';
   static const refreshToken = '/api/auth/refresh-token';
   static const logout       = '/api/auth/logout';
-  static const profile      = '/api/profile';
+  static const profile      = '/api/auth/profile';
 
   // ─── Exercises → /api/exercises ────────────────────────────
   static const exercises      = '/api/exercises';

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/network/dio_provider.dart';
 import '../../../../core/constants/api_endpoints.dart';
@@ -47,6 +48,15 @@ class _GymOwnerDashboardState extends ConsumerState<GymOwnerDashboard>
               style: TextStyle(color: AppColors.accentGreen, fontSize: 11)),
           ],
         ),
+        actions: [
+          if (myGym == null)
+            TextButton.icon(
+              onPressed: () => context.push('/create-gym'),
+              icon: const Icon(Icons.add, color: AppColors.accentGreen, size: 18),
+              label: const Text('Create Gym',
+                style: TextStyle(color: AppColors.accentGreen, fontSize: 13)),
+            ),
+        ],
         bottom: TabBar(
           controller: _tabs,
           indicatorColor: AppColors.accentGreen,

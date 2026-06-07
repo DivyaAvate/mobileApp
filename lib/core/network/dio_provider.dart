@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -10,6 +11,18 @@ final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
   return const FlutterSecureStorage();
 });
 
+// ─── Base URL — auto detect platform ─────────────────────────────────────────
+
+String get _baseUrl {
+  if (kIsWeb) {
+    return 'http://localhost:5000';
+  }
+  if (defaultTargetPlatform == TargetPlatform.android) {
+    return 'http://10.151.172.219:5000';        // PC hotspot IP
+  }
+  return 'http://localhost:5000';
+}
+
 // ─── Dio Provider ─────────────────────────────────────────────────────────────
 
 final dioProvider = Provider<Dio>((ref) {
@@ -17,9 +30,9 @@ final dioProvider = Provider<Dio>((ref) {
 
   final dio = Dio(
     BaseOptions(
-      baseUrl: ApiEndpoints.baseUrl,
+      baseUrl:        _baseUrl,
       connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 30),
       headers: {'Content-Type': 'application/json'},
     ),
   );
