@@ -26,6 +26,18 @@ final appRouter = GoRouter(
   initialLocation: '/splash',
   debugLogDiagnostics: true,
 
+  // ── Redirect guard ─────────────────────────────────────────
+  redirect: (context, state) {
+    final location = state.uri.path;
+
+    // Allow splash + auth routes always
+    final publicRoutes = ['/splash', '/login', '/register'];
+    if (publicRoutes.contains(location)) return null;
+
+    // No redirect needed for other routes
+    return null;
+  },
+
   errorBuilder: (context, state) => Scaffold(
     backgroundColor: const Color(0xFF0F1117),
     body: Center(
@@ -39,61 +51,61 @@ final appRouter = GoRouter(
   routes: [
     GoRoute(
       path: '/splash',
-      builder: (_, _) => const SplashScreen(),
+      builder: (_, __) => const SplashScreen(),
     ),
     GoRoute(
       path: '/create-gym',
-      builder: (_, _) => const CreateGymScreen(),
+      builder: (_, __) => const CreateGymScreen(),
     ),
     GoRoute(
       path: '/select-gym',
-      builder: (_, _) => const GymListScreen(),
+      builder: (_, __) => const GymListScreen(),
     ),
     GoRoute(
       path: '/gym-owner',
-      builder: (_, _) => const GymOwnerDashboard(),
+      builder: (_, __) => const GymOwnerDashboard(),
     ),
     // ─── Auth ──────────────────────────────────────────────────
     GoRoute(
       path: '/login',
       name: 'login',
-      builder: (_, _) => const LoginPage(),
+      builder: (_, __) => const LoginPage(),
     ),
     GoRoute(
       path: '/register',
       name: 'register',
-      builder: (_, _) => const RegisterPage(),
+      builder: (_, __) => const RegisterPage(),
     ),
     GoRoute(
       path: '/onboarding',
       name: 'onboarding',
-      builder: (_, _) => const OnboardingPage(),
+      builder: (_, __) => const OnboardingPage(),
     ),
 
     // ─── Main Shell ────────────────────────────────────────────
     ShellRoute(
-      builder: (_, _, child) => MainLayout(child: child),
+      builder: (_, __, child) => MainLayout(child: child),
       routes: [
-        GoRoute(path: '/home',        builder: (_, _) => const HomePage()),
-        GoRoute(path: '/workout',     builder: (_, _) => const WorkoutGenerationScreen()),
-        GoRoute(path: '/steps',       builder: (_, _) => const StepsScreen()),
-        GoRoute(path: '/coach',       builder: (_, _) => const ChatScreen()),
-        GoRoute(path: '/profile',     builder: (_, _) => const DashboardPage()),
-        GoRoute(path: '/progress',    builder: (_, _) => const ProgressDashboardPage()),
-        GoRoute(path: '/recovery',    builder: (_, _) => const RecoveryDashboardPage()),
-        GoRoute(path: '/achievements',builder: (_, _) => const AchievementsPage()),
-        GoRoute(path: '/leaderboard', builder: (_, _) => const LeaderboardPage()),
+        GoRoute(path: '/home',        builder: (_, __) => const HomePage()),
+        GoRoute(path: '/workout',     builder: (_, __) => const WorkoutGenerationScreen()),
+        GoRoute(path: '/steps',       builder: (_, __) => const StepsScreen()),
+        GoRoute(path: '/coach',       builder: (_, __) => const ChatScreen()),
+        GoRoute(path: '/profile',     builder: (_, __) => const DashboardPage()),
+        GoRoute(path: '/progress',    builder: (_, __) => const ProgressDashboardPage()),
+        GoRoute(path: '/recovery',    builder: (_, __) => const RecoveryDashboardPage()),
+        GoRoute(path: '/achievements',builder: (_, __) => const AchievementsPage()),
+        GoRoute(path: '/leaderboard', builder: (_, __) => const LeaderboardPage()),
       ],
     ),
 
     // ─── Standalone ────────────────────────────────────────────
     GoRoute(
       path: '/active-workout',
-      builder: (_, _) => const ActiveWorkoutScreen(),
+      builder: (_, __) => const ActiveWorkoutScreen(),
     ),
     GoRoute(
       path: '/exercise-list',
-      builder: (_, _) => const ExerciseListPage(),
+      builder: (_, __) => const ExerciseListPage(),
     ),
     GoRoute(
       path: '/exercise-detail',

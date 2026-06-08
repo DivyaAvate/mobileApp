@@ -82,10 +82,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   // ── Register ─────────────────────────────────────────────────
-  Future<bool> register(String email, String password, String name) async {
+  Future<bool> register(String email, String password, String name, {String role = 'member'}) async {
     state = state.copyWith(isLoading: true);
     try {
-      await _repo.register(email, password, name);
+      await _repo.register(email, password, name, role: role);
       state = state.copyWith(isLoading: false);
       return true;
     } catch (e) {

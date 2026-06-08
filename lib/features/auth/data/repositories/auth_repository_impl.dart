@@ -22,19 +22,24 @@ class AuthRepositoryImpl implements AuthRepository {
 
   // ── Register ──────────────────────────────────────────────
   @override
-  Future<void> register(String email, String password, String name) async {
+  Future<void> register(
+    String email,
+    String password,
+    String name, {
+    String role = 'member',
+  }) async {
     await _dio.post(
       ApiEndpoints.register,
       data: {
         'email':       email,
         'password':    password,
         'displayName': name,
+        'role':        role,
       },
     );
-    // Registration just creates the account — login separately after
   }
 
-  // ── Get profile (for auto-login on app start) ─────────────
+  // ── Get profile ───────────────────────────────────────────
   @override
   Future<UserModel> getProfile() async {
     final response = await _dio.get(ApiEndpoints.profile);
@@ -63,8 +68,6 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> logout() async {
     try {
       await _dio.post(ApiEndpoints.logout);
-    } catch (_) {
-      // Ignore backend errors — local token already cleared
-    }
+    } catch (_) {}
   }
 }

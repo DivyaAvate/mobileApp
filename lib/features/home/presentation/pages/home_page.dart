@@ -226,7 +226,7 @@ class HomePage extends ConsumerWidget {
 
     return offersAsync.when(
       loading: () => const SizedBox.shrink(),
-      error: (_, _) => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
       data: (offers) {
         if (offers.isEmpty) return const SizedBox.shrink();
         return Column(
@@ -245,7 +245,7 @@ class HomePage extends ConsumerWidget {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: offers.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 10),
+                separatorBuilder: (_, __) => const SizedBox(width: 10),
                 itemBuilder: (_, i) => _OfferChip(offer: offers[i]),
               ),
             ),

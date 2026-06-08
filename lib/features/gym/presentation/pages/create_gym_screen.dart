@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/network/dio_provider.dart';
 import '../../../../core/constants/api_endpoints.dart';
+import '../providers/gym_provider.dart'; // ← add this
 
 class CreateGymScreen extends ConsumerStatefulWidget {
   const CreateGymScreen({super.key});
@@ -44,6 +45,9 @@ class _CreateGymScreenState extends ConsumerState<CreateGymScreen> {
         'phone':       _phoneCtrl.text.trim(),
         'description': _descCtrl.text.trim(),
       });
+
+      // ← Refresh gym provider so dashboard updates
+      ref.invalidate(myGymProvider);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

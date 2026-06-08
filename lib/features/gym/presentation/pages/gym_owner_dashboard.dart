@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/network/dio_provider.dart';
 import '../../../../core/constants/api_endpoints.dart';
 import '../providers/gym_provider.dart';
+import 'package:go_router/go_router.dart';
 
 class GymOwnerDashboard extends ConsumerStatefulWidget {
   const GymOwnerDashboard({super.key});
@@ -33,7 +33,12 @@ class _GymOwnerDashboardState extends ConsumerState<GymOwnerDashboard>
   Widget build(BuildContext context) {
     final myGym = ref.watch(myGymProvider).valueOrNull;
 
-    return Scaffold(
+    return PopScope(
+      canPop: false, // prevent back button from exiting
+      onPopInvokedWithResult: (didPop, result) {
+        // Do nothing — gym owner dashboard is the root screen
+      },
+      child: Scaffold(
       backgroundColor: AppColors.bgPrimary,
       appBar: AppBar(
         backgroundColor: AppColors.bgPrimary,
@@ -81,7 +86,8 @@ class _GymOwnerDashboardState extends ConsumerState<GymOwnerDashboard>
                 _AnalyticsTab(gymId: myGym.id),
               ],
             ),
-    );
+    ),
+  );
   }
 }
 
@@ -230,7 +236,7 @@ class _MemberDetailSheet extends ConsumerWidget {
                     ],
                   )),
                 ]),
-              )),
+              )).toList(),
             ],
           );
         },
@@ -320,7 +326,7 @@ class _OffersTab extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                initialValue: selectedType,
+                value: selectedType,
                 dropdownColor: AppColors.bgCard,
                 style: const TextStyle(color: AppColors.textPrimary),
                 items: const [

@@ -3,6 +3,7 @@ const { WorkoutLog, ExerciseLog, SetLog } = require('../models/tracking.model');
 const { WorkoutPlan } = require('../models/workout_plan.model');
 const User            = require('../models/user.model');
 const crypto          = require('crypto');
+const { Op }          = require('sequelize');
 
 class GymService {
 
@@ -16,7 +17,7 @@ class GymService {
   async listGyms({ city, search } = {}) {
     const where = { isActive: true };
     if (city)   where.city = city;
-    if (search) where.name = { [require('sequelize').Op.like]: `%${search}%` };
+    if (search) where.name = { [Op.like]: `%${search}%` };
 
     return await Gym.findAll({
       where,
@@ -54,7 +55,10 @@ class GymService {
   // ── Get member's current gym ───────────────────────────────
   async getMemberGym(userId) {
     const membership = await GymMembership.findOne({
-      where: { userId, role: 'member' },
+      where: {
+        userId,
+        role: { [Op.in]: ['member', 'gym_owner'] },
+      },
       include: [{ model: Gym, as: 'gym' }],
       order: [['joinedAt', 'DESC']],
     });
@@ -146,9 +150,9 @@ class GymService {
       where: {
         gymId,
         isActive: true,
-        [require('sequelize').Op.or]: [
+        [Op.or]: [
           { expiresAt: null },
-          { expiresAt: { [require('sequelize').Op.gt]: new Date() } },
+          { expiresAt: { [Op.gt]: new Date() } },
         ],
       },
       order: [['createdAt', 'DESC']],

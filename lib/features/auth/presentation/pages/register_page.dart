@@ -1,8 +1,44 @@
+// ─── Role Button ──────────────────────────────────────────────────────────────
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_field.dart';
+
+class _RoleBtn extends StatelessWidget {
+  final String   label;
+  final bool     selected;
+  final VoidCallback onTap;
+  const _RoleBtn({required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+    child: GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.accentGreen.withValues(alpha: 0.08)
+              : AppColors.bgCard,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? AppColors.accentGreen : AppColors.border,
+            width: selected ? 1.5 : 0.5),
+        ),
+        child: Center(
+          child: Text(label,
+            style: TextStyle(
+              color: selected
+                  ? AppColors.accentGreen : AppColors.textPrimary,
+              fontSize: 13, fontWeight: FontWeight.w500)),
+        ),
+      ),
+    ),
+  );
+}
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -17,6 +53,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _passwordCtrl = TextEditingController();
   final _formKey      = GlobalKey<FormState>();
   bool  _isLoading    = false;
+  String _role        = 'member'; // default role
 
   @override
   void dispose() {
@@ -34,6 +71,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       _emailCtrl.text.trim(),
       _passwordCtrl.text.trim(),
       _nameCtrl.text.trim(),
+      role: _role,   // ← pass role
     );
 
     if (!mounted) return;
@@ -88,6 +126,26 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   style: TextStyle(
                     color: AppColors.textMuted, fontSize: 14)),
                 const SizedBox(height: 36),
+
+                // ── Role Selection ────────────────────────────
+                const Text('I am a:',
+                  style: TextStyle(
+                    color: AppColors.textMuted, fontSize: 12)),
+                const SizedBox(height: 8),
+                Row(children: [
+                  _RoleBtn(
+                    label:    '🏃 Member',
+                    selected: _role == 'member',
+                    onTap:    () => setState(() => _role = 'member'),
+                  ),
+                  const SizedBox(width: 10),
+                  _RoleBtn(
+                    label:    '🏋️ Gym Owner',
+                    selected: _role == 'gym_owner',
+                    onTap:    () => setState(() => _role = 'gym_owner'),
+                  ),
+                ]),
+                const SizedBox(height: 14),
 
                 // ── Full Name ─────────────────────────────────
                 AuthField(

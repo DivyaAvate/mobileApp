@@ -4,11 +4,11 @@ const User        = require('../models/user.model');
 // POST /api/auth/register
 exports.register = async (req, res, next) => {
   try {
-    const { email, password, displayName } = req.body;
+    const { email, password, displayName, role } = req.body; // ← add role
     if (!email || !password || !displayName) {
       return res.status(400).json({ message: 'Email, password and name are required' });
     }
-    const user = await authService.register(email, password, displayName);
+    const user = await authService.register(email, password, displayName, role);
     res.status(201).json({ message: 'User registered successfully', userId: user.id });
   } catch (error) {
     if (error.message?.includes('already exists') || error.name === 'SequelizeUniqueConstraintError') {

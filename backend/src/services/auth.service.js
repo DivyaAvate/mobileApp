@@ -27,18 +27,17 @@ class AuthService {
   }
 
   // ── Register ───────────────────────────────────────────────
-  async register(email, password, displayName) {
+  async register(email, password, displayName, role = 'member') {
     const existing = await User.findOne({ where: { email } });
     if (existing) throw new Error('User already exists');
 
-    // Model's beforeCreate hook handles hashing automatically
     const user = await User.create({
       email,
-      password,    // plain text — hook will hash it
+      password,
       displayName,
-      isVerified:  false,
+      role,           // ← save role
+      isVerified: false,
     });
-
     return user;
   }
 

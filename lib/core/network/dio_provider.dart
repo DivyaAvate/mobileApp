@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -18,7 +17,7 @@ String get _baseUrl {
     return 'http://localhost:5000';
   }
   if (defaultTargetPlatform == TargetPlatform.android) {
-    return 'http://10.151.172.219:5000';        // PC hotspot IP
+    return 'http://192.168.0.104:5000';        // PC hotspot IP
   }
   return 'http://localhost:5000';
 }
