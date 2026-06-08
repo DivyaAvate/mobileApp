@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/network/dio_provider.dart';
 import '../../../../core/constants/api_endpoints.dart';
+import '../../../workout/presentation/providers/workout_generator_provider.dart';
 
 // ─── Onboarding State ─────────────────────────────────────────────────────────
 
@@ -59,29 +60,53 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
       // 1. Save profile stats
       await dio.post(ApiEndpoints.profile, data: {
-        'age':        _data.age,
-        'heightCm':   _data.heightCm,
-        'weightKg':   _data.weightKg,
-        'gender':     _data.gender,
+        'age':         _data.age,
+        'heightCm':    _data.heightCm,
+        'weightKg':    _data.weightKg,
+        'gender':      _data.gender,
         'isOnboarded': true,
       });
 
       // 2. Generate workout plan
       await dio.post(ApiEndpoints.workoutGenerate, data: {
-        'goal':        _data.goal,
-        'experience':  _data.experience,
-        'daysPerWeek': _data.daysPerWeek,
+        'goal':        _data.goal        ?? 'general',
+        'experience':  _data.experience  ?? 'beginner',
+        'daysPerWeek': _data.daysPerWeek ?? 3,
       });
 
+      // 3. Invalidate workout provider so home screen refreshes
+      ref.invalidate(workoutGeneratorProvider);
+
+      // 4. Navigate to gym selection
       if (mounted) context.go('/select-gym');
+
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'),
-            backgroundColor: AppColors.error));
-      }
+      if (!mounted) return;
+
+      // Show specific error message
+      final msg = e.toString().contains('404')
+          ? 'Profile endpoint not found. Check backend.'
+          : e.toString().contains('401')
+          ? 'Session expired. Please login again.'
+          : 'Something went wrong. Please try again.';
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(msg),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          action: SnackBarAction(
+            label: 'Skip',
+            textColor: Colors.white,
+            onPressed: () {
+              // Allow skipping to gym selection even if save fails
+              context.go('/select-gym');
+            },
+          ),
+        ),
+      );
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -97,60 +122,66 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bgPrimary,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-          child: Column(
-            children: [
-              // ── Progress dots ──────────────────────────────
-              _buildDots(),
-              const SizedBox(height: 28),
+    return PopScope(
+      canPop: _step == 0,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && _step > 0) _back();
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.bgPrimary,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+            child: Column(
+              children: [
+                // ── Progress dots ────────────────────────────
+                _buildDots(),
+                const SizedBox(height: 28),
 
-              // ── Page content ───────────────────────────────
-              Expanded(
-                child: PageView(
-                  controller: _pages,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    _GoalStep(selected: _data.goal,
-                      onSelect: (v) => setState(() => _data.goal = v)),
-                    _ExperienceStep(selected: _data.experience,
-                      onSelect: (v) => setState(() => _data.experience = v)),
-                    _DaysStep(selected: _data.daysPerWeek,
-                      onSelect: (v) => setState(() => _data.daysPerWeek = v)),
-                    _StatsStep(data: _data,
-                      onChanged: () => setState(() {})),
-                  ],
+                // ── Page content ─────────────────────────────
+                Expanded(
+                  child: PageView(
+                    controller: _pages,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      _GoalStep(selected: _data.goal,
+                        onSelect: (v) => setState(() => _data.goal = v)),
+                      _ExperienceStep(selected: _data.experience,
+                        onSelect: (v) => setState(() => _data.experience = v)),
+                      _DaysStep(selected: _data.daysPerWeek,
+                        onSelect: (v) => setState(() => _data.daysPerWeek = v)),
+                      _StatsStep(data: _data,
+                        onChanged: () => setState(() {})),
+                    ],
+                  ),
                 ),
-              ),
 
-              // ── Buttons ────────────────────────────────────
-              Row(children: [
-                if (_step > 0)
+                // ── Buttons ──────────────────────────────────
+                Row(children: [
+                  if (_step > 0)
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _back,
+                        child: const Text('Back'),
+                      ),
+                    ),
+                  if (_step > 0) const SizedBox(width: 12),
                   Expanded(
-                    child: OutlinedButton(
-                      onPressed: _back,
-                      child: const Text('Back'),
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed: _canContinue && !_isLoading ? _next : null,
+                      child: _isLoading
+                          ? const SizedBox(width: 20, height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.bgPrimary))
+                          : Text(_step == _totalSteps - 1
+                              ? 'Build my plan 🚀' : 'Continue'),
                     ),
                   ),
-                if (_step > 0) const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: ElevatedButton(
-                    onPressed: _canContinue && !_isLoading ? _next : null,
-                    child: _isLoading
-                        ? const SizedBox(width: 20, height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.bgPrimary))
-                        : Text(_step == _totalSteps - 1
-                            ? 'Build my plan 🚀' : 'Continue'),
-                  ),
-                ),
-              ]),
-            ],
+                ]),
+              ],
+            ),
           ),
         ),
       ),
@@ -190,10 +221,10 @@ class _GoalStep extends StatelessWidget {
       subtitle: "We'll build your entire plan around this.",
       child: _OptionGrid(
         options: const [
-          _Option('lose_fat',     '🔥', 'Lose Fat'),
-          _Option('muscle_gain',  '💪', 'Build Muscle'),
-          _Option('strength',     '⚡', 'Build Strength'),
-          _Option('general',      '❤️', 'Stay Fit'),
+          _Option('lose_fat',    '🔥', 'Lose Fat'),
+          _Option('muscle_gain', '💪', 'Build Muscle'),
+          _Option('strength',    '⚡', 'Build Strength'),
+          _Option('general',     '❤️', 'Stay Fit'),
         ],
         selected: selected,
         onSelect: onSelect,
@@ -228,7 +259,7 @@ class _ExperienceStep extends StatelessWidget {
   }
 }
 
-// ─── Step 3 — Days per week ───────────────────────────────────────────────────
+// ─── Step 3 — Days ────────────────────────────────────────────────────────────
 
 class _DaysStep extends StatelessWidget {
   final int? selected;
@@ -343,7 +374,8 @@ class _StatsStep extends StatelessWidget {
 class _NumField extends StatelessWidget {
   final String label, hint;
   final void Function(String) onChanged;
-  const _NumField({required this.label, required this.hint, required this.onChanged});
+  const _NumField({required this.label, required this.hint,
+    required this.onChanged});
 
   @override
   Widget build(BuildContext context) => Column(
@@ -393,12 +425,13 @@ class _GenderBtn extends StatelessWidget {
   );
 }
 
-// ─── Shared Shells ────────────────────────────────────────────────────────────
+// ─── Shared ───────────────────────────────────────────────────────────────────
 
 class _StepShell extends StatelessWidget {
   final String title, subtitle;
   final Widget child;
-  const _StepShell({required this.title, required this.subtitle, required this.child});
+  const _StepShell({required this.title, required this.subtitle,
+    required this.child});
 
   @override
   Widget build(BuildContext context) => Column(

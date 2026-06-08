@@ -17,7 +17,7 @@ String get _baseUrl {
     return 'http://localhost:5000';
   }
   if (defaultTargetPlatform == TargetPlatform.android) {
-    return 'http://192.168.0.104:5000';        // PC hotspot IP
+    return 'http://192.168.0.111:5000';        // PC hotspot IP11
   }
   return 'http://localhost:5000';
 }
